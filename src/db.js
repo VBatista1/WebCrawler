@@ -3,13 +3,11 @@ mongoose.connect('mongodb://localhost:27017/Magalu');
 
 var smartphoneSchema = new mongoose.Schema({
     "id": String,
-    "@context": String,
-    "@type": String,
     "name": String,
     "image": String,
-    "brand": [{"@type": String, "name": String,}],
-    "aggregateRating": [{"@type": String, "ratingValue": String, "ratingCount": String,}],
-    "sku": String,
+    "brand": [{"name": String,}],
+    "offers": [{"lowPrice": String, "highPrice": String, "priceCurrency": String, "offerCount": String}],
+    "sku": { type: String, index: { unique: true }},
     "description": String,
 }, { collection: 'smartphones' }
 );

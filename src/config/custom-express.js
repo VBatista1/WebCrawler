@@ -26,10 +26,15 @@ Promise.all([p1,p2]).then(values => {
     console.log(values)
 });*/
 
-let termo = `https://www.magazineluiza.com.br/smartphone/celulares-e-smartphones/s/te/tcsp?page=1`;
+let termos = []; 
+
+for(let i = 0;i<300;i++)
+{
+  termos.push(`https://www.magazineluiza.com.br/smartphone/celulares-e-smartphones/s/te/tcsp?page=${i}&sort=type%3Aprice%2Corientation%3Aasc`);
+}
 
 var c = new Crawler({
-  maxConnections: 10,
+  rateLimit: 5000,
   // This will be called for each crawled page
   callback: function (error, res, done) {
     if (error) {
@@ -43,12 +48,10 @@ var c = new Crawler({
           script = JSON.parse(script.text());
           var Smartphones = db.Mongoose.model('smartphones', db.smartphoneSchema, 'smartphones');
           var smartphone = new Smartphones({ 
-            "@context": script["@context"], 
-            "@type": script["@type"],
             "name": script["name"],
             "image": script["image"][0],
-            "brand": [{"@type": script["brand"]["@type"], "name": script["brand"]["name"]}],
-            "aggregateRating": [{"@type": script["aggregateRating"]["@type"], "ratingValue": script["aggregateRating"]["ratingValue"], "ratingCount": script["aggregateRating"]["ratingCount"]}],
+            "brand": [{"name": script["brand"]["name"]}],
+            "offers": [{"lowPrice": script["offers"]["lowPrice"], "highPrice": script["offers"]["highPrice"], "priceCurrency": script["offers"]["priceCurrency"], "offerCount": script["offers"]["offerCount"]}],
             "sku": script["sku"],
             "description": script["description"]});
           smartphone.save(function (err) {
@@ -57,12 +60,12 @@ var c = new Crawler({
               return err;
             }
             else {
-              console.log("smartphone saved");
+              console.log(`smartphone ${smartphone["sku"]} saved`);
             }
           });
           }
           catch (e){
-  
+            console.log(e);
           }
       });
     }
@@ -71,6 +74,6 @@ var c = new Crawler({
 });
 
 // Queue just one URL, with default callback
-c.queue(termo);
+c.queue(termos);
 
 https: module.exports = app;
