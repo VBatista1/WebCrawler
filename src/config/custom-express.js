@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
-var montaPesquisa = require("../app/montaPesquisa");
-var getProduto = require("../app/getProduto");
+//var montaPesquisa = require("../app/montaPesquisa");
+//var getProduto = require("../app/getProduto");
 const Crawler = require("crawler");
-var db = require("../db");
+//var db = require("../db");
 
 /*var termo = "32PHG581378";
 var rangePreco = "800:1500";
@@ -26,27 +26,33 @@ Promise.all([p1,p2]).then(values => {
     console.log(values)
 });*/
 
-let termos = []; 
+let termos = [];
 
-for(let i = 0;i<300;i++)
-{
-  termos.push(`https://www.magazineluiza.com.br/smartphone/celulares-e-smartphones/s/te/tcsp?page=${i}&sort=type%3Aprice%2Corientation%3Aasc`);
+for (let i = 0; i < 300; i++) {
+  termos.push(
+    `https://www.magazineluiza.com.br/smartphone/celulares-e-smartphones/s/te/tcsp?page=${i}&sort=type%3Aprice%2Corientation%3Aasc`
+  );
 }
 
 var c = new Crawler({
-  rateLimit: 5000,
+  rateLimit: 1000,
   // This will be called for each crawled page
-  callback: function (error, res, done) {
+  callback: function(error, res, done) {
     if (error) {
       console.log(error);
     } else {
       var $ = res.$;
-      $("a[name ='linkToProduct']").each((i, element) => {
-          try{
-            const cheerioElement = $(element);
-          let script = cheerioElement.find("script");
-          script = JSON.parse(script.text());
-          var Smartphones = db.Mongoose.model('smartphones', db.smartphoneSchema, 'smartphones');
+      var url = $("link[rel='alternate']").attr("href");
+      console.log(url.substring(31, 41));
+      if (url.substring(31, 41) == "smartphone") {
+        $("a[data-css-rx7mj]").each((i, element) => {
+          if ($(element).parents("ul[data-css-iabqk5]").length) {
+            try {
+              const cheerioElement = $(element);
+              let script = cheerioElement.find("script");
+              script = JSON.parse(script.text());
+              console.log(script);
+              /*var Smartphones = db.Mongoose.model('smartphones', db.smartphoneSchema, 'smartphones');
           var smartphone = new Smartphones({ 
             "name": script["name"],
             "image": script["image"][0],
@@ -62,12 +68,13 @@ var c = new Crawler({
             else {
               console.log(`smartphone ${smartphone["sku"]} saved`);
             }
-          });
+          });*/
+            } catch (e) {
+              console.log(e);
+            }
           }
-          catch (e){
-            console.log(e);
-          }
-      });
+        });
+      }
     }
     done();
   }
