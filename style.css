@@ -6,7 +6,7 @@ body {
     display:none;
   }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1199px) {
   iframe {
         max-width: 100% !important;
     }
